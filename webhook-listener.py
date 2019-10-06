@@ -7,10 +7,10 @@ app = flask.Flask("webhook-listener")
 ##### FRONTEND PATHS ########
 @app.route('/', methods=["GET","POST"])
 def rootPage():
-    if request.method == "GET":
+    if flask.request.method == "GET":
         return "Webhook Listener ist running"
     else:
-        data = json.loads(request.body)
+        data = json.loads(flask.request.body)
         print(json.dumps(data))
 
 def readExecutionConfig():
