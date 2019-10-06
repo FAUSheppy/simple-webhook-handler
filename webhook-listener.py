@@ -30,13 +30,13 @@ def rootPage():
 
         # check for project in config #
         if not project or project not in config:
-            return ("Rejected: project not identified in config", 400)
+            return ("Rejected: project not identified in config", 401)
 
         token, scriptName = config[project]
 
         # check authentification #
         if TOKEN_HEADER not in flask.request.headers:
-            return ("Rejected: secret token not found in request", 403)
+            return ("Rejected: secret token not found in request", 402)
         elif token != flask.request.headers[TOKEN_HEADER]:
             return ("Rejected: secret token found but is mismatch", 403)
 
@@ -44,7 +44,7 @@ def rootPage():
         try:
             executeScript(scriptName)
         except subprocess.CalledProcessError:
-            return ("Failed: script execution on the server failed", 500)
+            return ("Failed: script execution on the server failed", 501)
 
         # signal successfull completion #
         return ("Success", 200)
