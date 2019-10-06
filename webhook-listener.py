@@ -21,11 +21,18 @@ def rootPage():
         data = flask.request.json
         print(json.dumps(flask.request.json, indent=4, sort_keys=True))
 
+        # check for project in request
+        project = None
+        try:
+            project = data["project"][PROJECT_IDENTIFIER]
+        except KeyError:
+            return ("Rejected: missing project/{} json path".format(PROJECT_IDENTIFIER), 400)
+
         # check for project in config #
-        if data["project"][PROJECT_IDENTIFIER] not in config:
+        if not project or project not in config:
             return ("Rejected: project not identified in config", 400)
 
-        token, scriptName = data["project"][PROJECT_IDENTIFIER]
+        token, scriptName = config[project]
 
         # check authentification #
         if TOKEN_HEADER not in flask.request.headers:
