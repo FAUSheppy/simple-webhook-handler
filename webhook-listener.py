@@ -59,6 +59,7 @@ def readExecutionConfig(configFile):
     global config
     with open(configFile, "r") as f:
         for line in f:
+            line = line.strip("\n")
             if line.startswith(COMMENT_INDICATOR):
                 continue
             projectIdent, token, scriptName = line.split(SEPERATOR)
