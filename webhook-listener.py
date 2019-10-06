@@ -9,6 +9,7 @@ app = flask.Flask("webhook-listener")
 TOKEN_HEADER = "X-Gitlab-Token"
 PROJECT_IDENTIFIER  = "web_url"
 SEPERATOR           = ","
+COMMENT_INDICATOR   = "#"
 config = {}
 
 ##### FRONTEND PATHS ########
@@ -51,6 +52,8 @@ def readExecutionConfig(configFile):
     global config
     with open(configFile, "r") as f:
         for line in f:
+            if line.startswith(COMMENT_INDICATOR):
+                continue
             projectIdent, token, scriptName = line.split(SEPERATOR)
             config.update({projectIdent:(token, scriptName)})
 
