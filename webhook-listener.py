@@ -6,6 +6,7 @@ import json
 app = flask.Flask("webhook-listener")
 TOKEN_HEADER = "X-Gitlab-Token"
 PROJECT_IDENTIFIER  = "web_url"
+SEPERATOR           = ","
 config = {}
 
 ##### FRONTEND PATHS ########
@@ -26,8 +27,12 @@ def rootPage():
             return ("Rejected: secret token found but is mismatch", 403)
 
 
-def readExecutionConfig():
-    pass
+def readExecutionConfig(configFile):
+    global config
+    with open(configFile, "r") as f:
+        for line in f:
+            projectIdent, token, scriptName = line.split(SEPERATOR)
+            config.update({projectIdent:(token, scriptName)})
 
 if __name__ == "__main__":
 
@@ -38,4 +43,6 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--port", default="5000", help="Port to listen on")
     parser.add_argument("-c", default="webhook.config", help="Config for handling of webhooks")
     args = parser.parse_args()
+
+    readExecutionConfig(args.c)
     app.run(host=args.interface, port=args.port)
