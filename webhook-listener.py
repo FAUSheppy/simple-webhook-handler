@@ -34,8 +34,8 @@ if __name__ == "__main__":
     parser  = argparse.ArgumentParser(description="Simple Webhook listener", \
                                         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument("-i", "--interface",     default="0.0.0.0",         help="Interface to listen on")
-    parser.add_argument("-p", "--port",          default="5000",            help="Port to listen on")
-    parser.add_argument("-e", "--execution-map", default="webhooks.config", help="Config for handling of webhooks")
+    parser.add_argument("-i", "--interface", default="0.0.0.0", help="Interface to listen on")
+    parser.add_argument("-p", "--port", default="5000", help="Port to listen on")
+    parser.add_argument("-c", default="webhooks.config", help="Config for handling of webhooks")
     args = parser.parse_args()
     app.run(host=args.interface, port=args.port)
