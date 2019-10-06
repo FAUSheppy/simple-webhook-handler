@@ -2,6 +2,8 @@
 import flask
 import argparse
 import json
+import os
+import subprocess as sp
 
 app = flask.Flask("webhook-listener")
 TOKEN_HEADER = "X-Gitlab-Token"
@@ -18,14 +20,32 @@ def rootPage():
         data = flask.request.json
         print(json.dumps(flask.request.json, indent=4, sort_keys=True))
 
-        # check request against configuration #
+        # check for project in config #
         if data["project"][PROJECT_IDENTIFIER] not in config:
             return ("Rejected: project not identified in config", 400)
+
+        token, scriptName = data["project"][PROJECT_IDENTIFIER]
+
+        # check authentification #
         if TOKEN_HEADER not in flask.request.headers:
             return ("Rejected: secret token not found in request", 403)
-        if config[data["project"][PROJECT_IDENTIFIER]] != flask.request.headers[TOKEN_HEADER]:
+        elif token != flask.request.headers[TOKEN_HEADER]:
             return ("Rejected: secret token found but is mismatch", 403)
 
+        # try to execute script #
+        try:
+            executeScript(scriptName)
+        except subprocess.CalledProcessError:
+            return ("Failed: script execution on the server failed", 500)
+
+        # signal successfull completion #
+        return ("Success", 200)
+
+
+def executeScript(scriptName):
+    path = os.path.expanduser(scriptName)
+    proc = subprocess.run(path)
+    proc.check_returncode()
 
 def readExecutionConfig(configFile):
     global config
