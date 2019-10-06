@@ -3,7 +3,7 @@ import flask
 import argparse
 import json
 import os
-import subprocess as sp
+import subprocess
 
 app = flask.Flask("webhook-listener")
 TOKEN_HEADER = "X-Gitlab-Token"
