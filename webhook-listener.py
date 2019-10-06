@@ -11,8 +11,7 @@ def rootPage():
     if flask.request.method == "GET":
         return "Webhook Listener ist running"
     else:
-        data = json.loads(flask.request.body)
-        print(json.dumps(data))
+        print(json.dumps(flask.request.json))
 
 def readExecutionConfig():
     pass
