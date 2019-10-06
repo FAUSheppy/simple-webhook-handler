@@ -31,5 +31,8 @@ The header with the name specified in *$TOKEN_HEADER* doesn't exist.
 ## 403 - secret token found but is mismatch
 The project was found in the configuration and the correct header exists, but the header is either empty or the content (the token) of the header doesn't match the token specified in the configuration file.
 
+# More Examples
+Have a look at [my CI-Scripts and config](https://github.com/FAUSheppy/auto-redeploy-scripts) for more examples on how to work with this tool.
+
 # Contribution & Feature-Requests
 Contributions and feature requests are welcomed but must retain the spirit of this been a simple solution for simple problems.
