@@ -52,8 +52,7 @@ def rootPage():
 
 def executeScript(scriptName):
     path = os.path.expanduser(scriptName)
-    proc = subprocess.run(path)
-    proc.check_returncode()
+    subprocess.Popen(path)
 
 def readExecutionConfig(configFile):
     global config
