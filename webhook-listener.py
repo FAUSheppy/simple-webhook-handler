@@ -26,25 +26,35 @@ def rootPage():
         try:
             project = data["project"][PROJECT_IDENTIFIER]
         except KeyError:
-            return ("Rejected: missing project/{} json path".format(PROJECT_IDENTIFIER), 400)
+            retString = "Rejected: missing project/{} json path".format(PROJECT_IDENTIFIER)
+            print(retString, file=sys.stderr)
+            return (retString, 400)
 
         # check for project in config #
         if not project or project not in config:
-            return ("Rejected: project not identified in config", 401)
+            retString = "Rejected: project not identified in config"
+            print(retString, file=sys.stderr)
+            return (retString, 401)
 
         token, scriptName = config[project]
 
         # check authentification #
         if TOKEN_HEADER not in flask.request.headers:
-            return ("Rejected: secret token not found in request", 402)
+            retString = "Rejected: secret token not found in request"
+            print(retString, file=sys.stderr)
+            return (retString, 402)
         elif token != flask.request.headers[TOKEN_HEADER]:
-            return ("Rejected: secret token found but is mismatch", 403)
+            retString = "Rejected: secret token found but is mismatch"
+            print(retString, file=sys.stderr)
+            return (retString, 403)
 
         # try to execute script #
         try:
             executeScript(scriptName)
         except subprocess.CalledProcessError:
-            return ("Failed: script execution on the server failed", 501)
+            retString = "Failed: script execution on the server failed"
+            print(retString, file=sys.stderr)
+            return (retString, 501)
 
         # signal successfull completion #
         return ("Success", 200)
