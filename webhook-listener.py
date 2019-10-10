@@ -13,6 +13,11 @@ SEPERATOR           = ","
 COMMENT_INDICATOR   = "#"
 config = {}
 
+HTTP_FORBIDDEN      = 401
+HTTP_NOT_FOUND      = 404
+HTTP_UNPROCESSABLE  = 422
+HTTP_INTERNAL_ERR   = 500
+
 ##### FRONTEND PATHS ########
 @app.route('/', methods=["GET","POST"])
 def rootPage():
@@ -23,7 +28,7 @@ def rootPage():
         if data == None:
             retString = "POST-request is missing payload."
             print(retString, file=sys.stderr)
-            return (retString, 400)
+            return (retString, HTTP_UNPROCESSABLE)
 
         print(json.dumps(flask.request.json, indent=4, sort_keys=True))
 
@@ -34,13 +39,13 @@ def rootPage():
         except KeyError:
             retString = "Rejected: missing project/{} json path".format(PROJECT_IDENTIFIER)
             print(retString, file=sys.stderr)
-            return (retString, 400)
+            return (retString, HTTP_UNPROCESSABLE)
 
         # check for project in config #
         if not project or project not in config:
             retString = "Rejected: project not identified in config"
             print(retString, file=sys.stderr)
-            return (retString, 401)
+            return (retString, HTTP_NOT_FOUND)
 
         token, scriptName = config[project]
 
@@ -48,11 +53,11 @@ def rootPage():
         if TOKEN_HEADER not in flask.request.headers:
             retString = "Rejected: secret token not found in request"
             print(retString, file=sys.stderr)
-            return (retString, 402)
+            return (retString, HTTP_FORBIDDEN)
         elif token != flask.request.headers[TOKEN_HEADER]:
             retString = "Rejected: secret token found but is mismatch"
             print(retString, file=sys.stderr)
-            return (retString, 403)
+            return (retString, HTTP_FORBIDDEN)
 
         # try to execute script #
         try:
@@ -60,7 +65,7 @@ def rootPage():
         except subprocess.CalledProcessError:
             retString = "Failed: script execution on the server failed"
             print(retString, file=sys.stderr)
-            return (retString, 501)
+            return (retString, HTTP_INTERNAL_ERR)
 
         # signal successfull completion #
         return ("Success", 200)
