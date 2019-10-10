@@ -20,6 +20,11 @@ def rootPage():
         return "Webhook Listener ist running"
     else:
         data = flask.request.json
+        if data == None:
+            retString = "POST-request is missing payload."
+            print(retString, file=sys.stderr)
+            return (retString, 400)
+
         print(json.dumps(flask.request.json, indent=4, sort_keys=True))
 
         # check for project in request
