@@ -7,6 +7,7 @@ import os
 import subprocess
 
 app = flask.Flask("webhook-listener")
+app.config["EXEC_CONFIG"] = "webhook.config"
 TOKEN_HEADER = "X-Gitlab-Token"
 PROJECT_IDENTIFIER  = "web_url"
 SEPERATOR           = ","
@@ -85,6 +86,10 @@ def readExecutionConfig(configFile):
             projectIdent, token, scriptName = line.split(SEPERATOR)
             config.update({projectIdent:(token, scriptName)})
 
+@app.before_first_request
+def init():
+    readExecutionConfig(app.config["EXEC_CONFIG"])
+
 if __name__ == "__main__":
 
     parser  = argparse.ArgumentParser(description="Simple Webhook listener", \
@@ -95,5 +100,5 @@ if __name__ == "__main__":
     parser.add_argument("-c", default="webhook.config", help="Config for handling of webhooks")
     args = parser.parse_args()
 
-    readExecutionConfig(args.c)
+    app.config["EXEC_CONFIG"] = args.c
     app.run(host=args.interface, port=args.port)

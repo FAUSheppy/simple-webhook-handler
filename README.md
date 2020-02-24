@@ -6,6 +6,23 @@ The config file uses *COMMA* as a separator, lines are comments if they start wi
 
     PROJECT,TOKEN,PATH_TO_SCRIPT
 
+# Running standalone with flask-inbuild server
+
+    usage: webhook_listener.py [-h] [-i INTERFACE] [-p PORT] [-c C]
+    Simple Webhook listener
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -i INTERFACE, --interface INTERFACE
+                            Interface to listen on (default: 0.0.0.0)
+      -p PORT, --port PORT  Port to listen on (default: 5000)
+      -c C                  Config for handling of webhooks (default:
+                            webhook.config)
+
+# Running with waitress (WSGI)
+
+    waitress-serve --host 127.0.0.1 --port 5000 --call 'app:createApp'
+
 # Running behind NGINX for SSL
 You can (and should) run this tool behind a reverse proxy handling SSL. I recommend nginx with this configuration. Note the *proxy_next_upstream*-directive which tells nginx, that it should only report a timeout as bad gateway, since the backend will respond with certain error codes to ease debugging.
 
