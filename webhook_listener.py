@@ -5,6 +5,8 @@ import argparse
 import json
 import os
 import subprocess
+import hashlib
+import hmac
 
 app = flask.Flask("webhook-listener")
 app.config["EXEC_CONFIG"] = "webhook.config"
@@ -28,36 +30,56 @@ def rootPage():
         data = flask.request.json
         if data == None:
             retString = "POST-request is missing payload."
-            print(retString, file=sys.stderr)
+            print(retString)
             return (retString, HTTP_UNPROCESSABLE)
 
         print(json.dumps(flask.request.json, indent=4, sort_keys=True))
 
         # check for project in request
         project = None
+        githubMode = False
         try:
-            project = data["project"][PROJECT_IDENTIFIER]
+            if "project" in data: # gitlab
+                project = data["project"][PROJECT_IDENTIFIER]
+            if "repository" in data: #github
+                project = data["repository"]["html_url"]
+                githubMode = True
         except KeyError:
             retString = "Rejected: missing project/{} json path".format(PROJECT_IDENTIFIER)
-            print(retString, file=sys.stderr)
+            print(retString)
             return (retString, HTTP_UNPROCESSABLE)
 
         # check for project in config #
         if not project or project not in config:
             retString = "Rejected: project not identified in config"
-            print(retString, file=sys.stderr)
+            print(retString)
             return (retString, HTTP_NOT_FOUND)
 
         token, scriptName = config[project]
 
         # check authentification #
-        if TOKEN_HEADER not in flask.request.headers:
+        GITHUB_HEADER = "X-Hub-Signature"
+        if githubMode:
+            if GITHUB_HEADER not in flask.request.headers:
+                retString = "{} not found in headers".format(GITHUB_HEADER)
+                print(retString)
+                return (retString, HTTP_FORBIDDEN)
+            else:
+                hmacRemote = flask.request.headers[GITHUB_HEADER]
+                hmacLocal = hmac.new(token.encode(), flask.request.data, hashlib.sha1).hexdigest()
+                hmacLocal = "sha1=" + hmacLocal
+                if not hmacLocal == hmacRemote:
+                    retString = "Rejected: Hash found but is mismatch"
+                    print(retString)
+                    return (retString, HTTP_FORBIDDEN)
+
+        elif TOKEN_HEADER not in flask.request.headers:
             retString = "Rejected: secret token not found in request"
-            print(retString, file=sys.stderr)
+            print(retString)
             return (retString, HTTP_FORBIDDEN)
         elif token != flask.request.headers[TOKEN_HEADER]:
             retString = "Rejected: secret token found but is mismatch"
-            print(retString, file=sys.stderr)
+            print(retString)
             return (retString, HTTP_FORBIDDEN)
 
         # try to execute script #
@@ -65,7 +87,7 @@ def rootPage():
             executeScript(scriptName)
         except subprocess.CalledProcessError:
             retString = "Failed: script execution on the server failed"
-            print(retString, file=sys.stderr)
+            print(retString)
             return (retString, HTTP_INTERNAL_ERR)
 
         # signal successfull completion #
