@@ -1,3 +1,0 @@
-# lines starting with '#' are comments
-# web_url,SECRET_TOKEN,script_to_execute
-# https://gitlab.com/Sheppy_/serien-ampel,test,scripts/example.sh
